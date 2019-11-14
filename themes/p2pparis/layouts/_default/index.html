@@ -1,15 +1,5 @@
 {{ define "main" }}
-{{ $s := newScratch }}
 {{ $statuses := $.Scratch.Get "event_status" }}
-
-<!-- Split up upcoming events into chunks of 3 -->
-{{ $chunk_size := 3.0 }}
-{{ $chunks := math.Ceil (div (len ($.Scratch.Get "upcoming_events")) $chunk_size) }}
-{{ range $index := seq $chunks }}
-    {{ $i := sub $index 1 }}
-    {{ $items := first $chunk_size (after (mul $i $chunk_size) ($.Scratch.Get "upcoming_events")) }}
-    {{ $s.Set (print "upcoming_" $index) $items }}
-{{ end }}
 
 <!-- Masthead -->
 <header class="masthead">
@@ -101,24 +91,17 @@
             </div><!-- /.col -->
         </div><!-- /.row -->
 
-        {{ range $index := seq $chunks }}
-        {{ $items := $s.Get (print "upcoming_" $index) }}
-
-        <div class="row" upcoming-row-number="{{ $index }}" {{ if ne $index 1 }}style="display:none;"{{ end }}>
-            {{ range $items }}
-            <div class="col-lg-4 col-md-6">
+        <div id="upcoming-events" class="row">
+            {{ range $index, $item := $.Scratch.Get "upcoming_events" }}
+            <div class="col-lg-4 col-md-6 event-item" {{ if gt $index 2 }}style="display:none;"{{ end }}>
                 {{ partial "block_event" (dict "ctx" . "status" (index $statuses .UniqueID)) }}
             </div><!-- /.col -->
             {{ end }}
+
+            <div class="col-md-12 mx-auto mb-5 text-center">
+                <a id="loadmore" class="btn btn-secondary btn-xl" href="#">View more upcoming events</a>
+            </div>
         </div><!-- /.row -->
-
-        {{ end }}
-
-        <div id="loadMore" style="">
-                <a href="#">Load More</a>
-              </div>
-
-        
 
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
