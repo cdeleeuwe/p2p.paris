@@ -1,0 +1,45 @@
+				<div class="block block-single">
+					<h3><i class="far fa-calendar-alt"></i>Date</h3>
+					<strong>{{ dateFormat "January 2, 2006" .Params.event_date }}</strong>
+				</div><!-- /.block -->
+
+				<div class="block block-single">
+					<h3><i class="far fa-clock"></i>{{ i18n "schedule" . | markdownify }}</h3>
+					<p>
+						{{ i18n "schedule_a" . | markdownify }}
+						<br/>
+						{{ i18n "schedule_b" . | markdownify }}
+						<br/>
+						{{ i18n "schedule_c" . | markdownify }}
+						<br/>
+						{{ i18n "schedule_d" . | markdownify }}
+					</p>
+				</div><!-- /.block -->
+
+				<div class="block block-single">
+					<h3><i class="far fa-map-marker"></i>{{ i18n "location" . | markdownify }}</h3>
+					<p>
+						{{ i18n "location_text" . | markdownify }}
+						<br/>
+						<br/>
+						<strong>Ground Control
+						<br/>
+						Gare de Lyon – 81 rue du Charolais – 75012 Paris</strong>
+					</p>
+				</div><!-- /.block -->
+
+				<div class="block block-single">
+					<h3><i class="far fa-clipboard-check"></i>{{ i18n "register" . | markdownify }}</h3>
+					<p>{{ i18n "register_a" . | markdownify }} <a href="{{ .Params.Meetup_link }}">Meetup</a></p>
+					<p>{{ i18n "register_b" . | markdownify }}</p>
+				</div><!-- /.block -->
+
+				<div class="block block-single">
+					<h3><i class="far fa-presentation"></i>{{ i18n "talk" . | markdownify }}</h3>
+					<p>
+						{{ i18n "talk_a" . | markdownify }}
+					</p>
+					<p>
+						{{ i18n "talk_b" . | markdownify }}
+					</p>
+				</div><!-- /.block -->
