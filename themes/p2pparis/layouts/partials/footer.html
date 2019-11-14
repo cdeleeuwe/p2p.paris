@@ -17,6 +17,21 @@
   {{if .IsHome}}
   <script src="/js/lottie.js"></script>
   {{ end }}
+
+  <script>
+            $(function() {
+                let counter = 1;
+                $("#loadMore").on('click', function (e) {
+                    e.preventDefault();
+                    $(".row:hidden").slice(0, counter).slideDown();
+                    counter++;
+                    if ($(".row:hidden").length == 0) {
+                      $("#loadMore").fadeOut('slow');
+                    }
+                  });
+            
+        })
+        </script>
 </body>
 
 </html>
