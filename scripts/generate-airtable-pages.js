@@ -239,7 +239,13 @@ function flattenAirtableRecords(tableName, items) {
         value = value.map(item => {
           if (item && item.filename) {
             const url = item.thumbnails.large.url;
-            return { is_image: true, remote: url, local: getImagePath(url, false)};
+            const extension = item.type.split('/')[1];
+            return { 
+              is_image: true, 
+              remote: url, 
+              local: getImagePath(`${url}.${extension}`, false),
+              localAbsolute: getImagePath(`${url}.${extension}`),
+            };
           }
           return item;
         })
@@ -398,7 +404,7 @@ function downloadImagesFromItems(items) {
         value.forEach(async v => {
           if (v && v.is_image) {
             try {
-              await downloadImage(v.remote);
+              await downloadImage(v.remote, v.localAbsolute);
             } catch (err) {
               log(`Image download error: ${v.remote}, ${err}`);
               process.exit(4);
@@ -410,14 +416,14 @@ function downloadImagesFromItems(items) {
   });
 }
 
-async function downloadImage(url) {
+async function downloadImage(url, destination) {
   log(`Downloading image ${url}`);
   const filepath = getImagePath(url);
   fs.mkdirSync(path.dirname(filepath), { recursive: true });
 
   const res = await fetch(url);
   return new Promise((resolve, reject) => {
-    const fileStream = fs.createWriteStream(filepath);
+    const fileStream = fs.createWriteStream(destination);
     res.body.pipe(fileStream);
     res.body.on("error", (err) => {
       reject(err);
