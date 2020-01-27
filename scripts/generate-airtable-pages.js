@@ -14,17 +14,17 @@ main();
 async function main() {
   let entities;
 
-  const pagesToCreate = ['Talk', 'Speaker'];
+  const pagesToCreate = ['TalkWIP', 'SpeakerWIP', 'EventWIP'];
   const tableNames = [
-    'Talk',
-    'Speaker',
-    'Event',
+    'TalkWIP',
+    'SpeakerWIP',
+    'EventWIP',
     'Tag',
     'Chapter',
     'Talk%20Kind',
     'Settings',
     'Organization',
-    'Location',
+    'LocationWIP',
     'Donation'
   ];
 
@@ -32,13 +32,13 @@ async function main() {
     const promises = tableNames.map(name => fetchTable(name));
     entities = (await Promise.all(promises)).map((items, index) => {
       const tableName = tableNames[index];
-      if (tableName == 'Talk') {
+      if (tableName == 'LocationWIP') {
         items = items
           .filter(isPublished)
           .filter(item => item.chapter && item.chapter.indexOf(CHAPTER) > -1);
       }
 
-      if (tableName == 'Speaker') {
+      if (tableName == 'SpeakerWIP') {
         items = items
           .filter(item => item.chapters && item.chapters.indexOf(CHAPTER) > -1);
       }
@@ -107,15 +107,15 @@ function addPageProps(item) {
   let title = '';
   let basedir = '';
   switch (item.from_table) {
-    case 'talk':
+    case 'talkwip':
       // No need to define here, as it has a multi language title title_(en) title_(fr)
       basedir = '/talks/';
       break;
-    case 'speaker':
+    case 'speakerwip':
       title = item.name;
       basedir = '/speakers/';
       break;
-    case 'event':
+    case 'eventwip':
       title = item.name;
       basedir = '/event/';
       break;
