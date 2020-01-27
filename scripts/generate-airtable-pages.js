@@ -25,22 +25,30 @@ async function main() {
     'Settings',
     'Organization',
     'LocationWIP',
-    'Donation'
+    'Donation',
+    'Place'
   ];
 
   try {
     const promises = tableNames.map(name => fetchTable(name));
     entities = (await Promise.all(promises)).map((items, index) => {
       const tableName = tableNames[index];
-      if (tableName == 'LocationWIP') {
+      if (tableName == 'TalkWIP') {
         items = items
           .filter(isPublished)
           .filter(item => item.chapter && item.chapter.indexOf(CHAPTER) > -1);
       }
 
       if (tableName == 'SpeakerWIP') {
+        
         items = items
           .filter(item => item.chapters && item.chapters.indexOf(CHAPTER) > -1);
+      }
+
+      if (tableName == 'EventWIP') {
+        items.forEach(console.log)
+        items = items
+          .filter(item => item.chapter && item.chapter.indexOf(CHAPTER) > -1);
       }
 
       if (pagesToCreate.includes(tableName)) {
@@ -68,7 +76,15 @@ async function main() {
   const defaultLanguage = 'en';
   ['en', 'fr'].forEach(lang => {
     // Join relations. 1 level deep
-    const joined = joinRelations(translated[lang]);
+    const joined = joinRelations(translated[lang])
+      .map(item => {
+        if (item.from_table == 'eventwip') {
+          console.log({item})
+          item.talks_by_day = groupTalksByDay(item);
+        }
+
+        return item;
+      })
 
     // Create normalized .Data.gen.airtable_LANG.json file with all entities
     generateDataFile(
@@ -80,19 +96,6 @@ async function main() {
     generateDataFile(
       `settings_${lang}.json`,
       normalizeArray(translated[lang].filter(item => item.from_table == 'settings'), 'key')
-    );
-
-    // Create donation data file in .Data.gen.donation_LANG.json file
-    generateDataFile(
-      `donation_${lang}.json`,
-      normalizeArray(translated[lang].filter(item => item.from_table == 'donation'), 'key')
-    );
-
-    // create Festival data
-    createFestivalData(
-      lang,
-      joined.find(event => event.name == 'Paris P2P Festival #0'),
-      joined.filter(item => item.from_table == 'speaker').filter(item => item.in_paris_p2p__0_speakers_list),
     );
 
     // Create pages
@@ -116,6 +119,7 @@ function addPageProps(item) {
       basedir = '/speakers/';
       break;
     case 'eventwip':
+      
       title = item.name;
       basedir = '/event/';
       break;
@@ -476,8 +480,11 @@ async function downloadAttachmentsFromItems(items) {
 }
 
 async function downloadAttachment(url, destination) {
-  log(`Downloading attachment ${url}`);
   const filepath = getAttachmentPath(destination);
+  if (fs.existsSync(filepath)) {
+    return;
+  }
+  log(`Downloading attachment ${url}`);
   fs.mkdirSync(path.dirname(filepath), { recursive: true });
 
   const res = await fetch(url);
@@ -520,6 +527,33 @@ function getAttachmentPath(filepath, absolute = true) {
   return absolute
     ? path.join(__dirname, `../assets/gen/${filename}`)
     : path.join(`/gen/${filename}`);
+}
+
+function groupTalksByDay(event) {
+  console.log({event})
+  if (!event.talk_copy) return [];
+  let result = [];
+  const days = {};
+  event.talk_copy.forEach(talk => {
+    if (!talk.day) return;
+    if (days[talk.day]) {
+      days[talk.day].push(talk);
+    }
+    else {
+      days[talk.day] = [ talk ];
+    }
+  });
+
+  Object.keys(days).forEach((date) => {
+    const events = days[date];
+    events.sort((a,b) => {
+      return a.weight - b.weight;
+    });
+
+    result.push({ date, events });
+  });
+
+  return result;
 }
 
 function log(message) {
